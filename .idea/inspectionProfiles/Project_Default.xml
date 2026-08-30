@@ -1,0 +1,39 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="false" level="WARNING" enabled_by_default="false">
+      <option name="ignoredPackages">
+        <list>
+          <option value="annotated-doc" />
+          <option value="annotated-types" />
+          <option value="anyio" />
+          <option value="click" />
+          <option value="colorama" />
+          <option value="fastapi" />
+          <option value="greenlet" />
+          <option value="h11" />
+          <option value="idna" />
+          <option value="pydantic" />
+          <option value="pydantic_core" />
+          <option value="PySide6" />
+          <option value="PySide6_Addons" />
+          <option value="PySide6_Essentials" />
+          <option value="shiboken6" />
+          <option value="SQLAlchemy" />
+          <option value="starlette" />
+          <option value="typing-inspection" />
+          <option value="typing_extensions" />
+          <option value="uvicorn" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyShadowingBuiltinsInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredNames">
+        <list>
+          <option value="input" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="SqlCurrentSchemaInspection" enabled="true" level="ERROR" enabled_by_default="true" editorAttributes="ERRORS_ATTRIBUTES" />
+  </profile>
+</component>
