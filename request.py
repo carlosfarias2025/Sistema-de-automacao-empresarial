@@ -5,6 +5,8 @@ também para estudar como funciona o envio de JWT pela rede
 """
 
 import requests
+import base64
+import json
 
 URL = "http://127.0.0.1:8000"
 
@@ -39,7 +41,7 @@ def logintest():
 def perfiltest():
     print("ola gay")
 
-
+token = None
 
 def main():
     while True:
@@ -49,13 +51,9 @@ def main():
                 print("Error")
                 continue
             else:
-                match entrada:
-                    case 0:
-                        name = list(rotas.keys())[entrada]
-                        token = rotas[name]()
-                        headers = {"Authorization": f"Bearer {token}"}
-                        resposta = requests.get(f"{URL}/perfil", headers=headers)
-                        print(f"Resposta: {resposta.text}")
+                name = list(rotas.keys())[entrada]
+                token = rotas[name]()
+                header, payload, assinatura = token.split(".")
             break
         except ValueError:
             print("por favor digite um número")
