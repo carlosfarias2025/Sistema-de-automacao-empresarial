@@ -1,17 +1,3 @@
-"""
-Exemplo de autenticação JWT (HS256) com FastAPI.
-
-Fluxo:
-1. POST /login          -> valida usuário/senha e devolve um access token JWT
-2. GET  /perfil          -> rota protegida, exige "Authorization: Bearer <token>"
-
-Para rodar:
-    pip install fastapi pyjwt bcrypt python-multipart uvicorn
-    uvicorn auth_jwt_exemplo:app --reload
-
-Depois abra http://127.0.0.1:8000/docs para testar pelo Swagger.
-"""
-
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
@@ -19,12 +5,6 @@ import jwt
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-# ---------------------------------------------------------------------------
-# Configuração da chave JWT
-# ---------------------------------------------------------------------------
-# Em produção, essa chave NUNCA fica hardcoded no código: vem de variável de
-# ambiente / secret manager. É uma única chave do servidor de autenticação,
-# não uma chave por usuário (ver explicação no chat).
 SECRET_KEY = "troque-isso-por-uma-chave-forte-e-aleatoria"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 15
