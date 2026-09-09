@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, text
-from tablesSQL import Base
+from backend.tablesSQL import Base
 
 DATABASE_URL = "postgresql+psycopg://postgres:carlos123@localhost:5432/postgres"
 
