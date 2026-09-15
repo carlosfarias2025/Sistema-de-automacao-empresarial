@@ -1,1 +1,2 @@
-from backend.tablesSQL.Base import Base
+from .Base import Base
+from .User import User
