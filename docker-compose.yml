@@ -15,7 +15,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  app:
+  backend:
     image: b2c6bd1f6305
     container_name: sistemaemprasarial
     restart: always
@@ -29,5 +29,16 @@ services:
       - DB_NAME= ${POSTGRES_DB}
     depends_on:
       - db
+
+  front:
+    image: sha256:edfc78ea37d55cf4df3f42d9a753af95371dacdc02224d461f92442f74c04963
+    container_name: app-react
+    restart: always
+    ports:
+      - "5000:5000"
+    depends_on:
+      - backend
+
+
 volumes:
   postgres_data:
