@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 
+
 function App() {
   const [respostaApi, setRespostaApi] = useState(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState(null);
 
 
-  const API_URL = 'http://127.0.0.1:8000/';
+  const API_URL = import.meta.env.VITE_HOST_REACT;
 
   useEffect(() => {
     async function checarStatus() {
@@ -29,6 +30,7 @@ function App() {
     }
 
     checarStatus();
+    console.log("Minha URL do env:", import.meta.env.HOST_REACT);
   }, []);
 
   return (
