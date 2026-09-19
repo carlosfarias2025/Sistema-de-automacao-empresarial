@@ -118,7 +118,6 @@ class ServicoUsuario:
     def usuario_atual_dependencia(
         self, token: str = Depends(OAuth2PasswordBearer(tokenUrl="login"))
     ):
-        logger.info("estou aqui")
         return self.obter_usuario_atual(token)
 
     def adicionar_automacao(self,automacao:Automation):

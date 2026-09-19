@@ -60,7 +60,7 @@ def registrar(newuser:CadastroUsuario):
             username=newuser.name,
             fullname=newuser.full_name,
             email=newuser.email,
-            senha_plana=customerService.gerar_hash_senha(newuser.password),
+            senha_plana=newuser.password,
         )
 
     except IntegrityError:
@@ -100,7 +100,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
     # O payload carrega o que os outros serviços/rotas precisam saber
     # sobre esse usuário, sem precisar consultar o banco de novo.
     access_token = customerService.criar_access_token(
-        dados={"sub": usuario.username, "role": "user"}
+        dados={"sub": usuario.name, "role": "user"}
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -114,16 +114,15 @@ def ler_perfil(usuario_atual: User = Depends(customerService.usuario_atual_depen
     }
 
 @app.post("/automacao")
-def ler_automacao(automacao: AutomacaoCreate, usuario_atual: User = Depends(customerService.usuario_atual_dependencia)):
+def criar_automacao(automacao: AutomacaoCreate,usuario_atual: User = Depends(customerService.usuario_atual_dependencia)):
     automation = Automation(
-        nome=automacao.nome,
         user=usuario_atual,
+        nome=automacao.nome,
     )
-
     customerService.adicionar_automacao(automation)
-    return{"automaca": "ok"}
-
-
+    return {
+        "Automacao": automacao.nome
+    }
 
 
 app.add_middleware(
