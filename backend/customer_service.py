@@ -7,8 +7,11 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from tablesSQL import User
+from tablesSQL import User,Automation
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 class ServicoUsuario:
     """Centraliza operações de usuário, senha e tokens de acesso."""
@@ -27,6 +30,7 @@ class ServicoUsuario:
 
     @staticmethod
     def gerar_hash_senha(senha_plana: str) -> str:
+        logger.info("gerando hash senha")
         hash_bytes = bcrypt.hashpw(senha_plana.encode("utf-8"), bcrypt.gensalt())
         return hash_bytes.decode("utf-8")
 
@@ -51,8 +55,16 @@ class ServicoUsuario:
             usuario_existente = session.scalar(
                 select(User).where(User.name == username)
             )
+            email_existente = session.scalar(select(User).where(User.email == email))
+
             if usuario_existente is not None:
                 return False
+
+            if email_existente is not None:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="email já existe"
+                )
 
             session.add(
                 User(
@@ -62,11 +74,14 @@ class ServicoUsuario:
                     password=self.gerar_hash_senha(senha_plana),
                 )
             )
-            session.commit()
+            try:
+                session.commit()
+            except Exception as e:
+                logger.exception(e)
             return True
 
-    def autenticar_usuario(self, username: str, senha: str):
-        usuario = self.buscar_usuario_por_username(username)
+    def autenticar_usuario(self, name: str, senha: str):
+        usuario = self.buscar_usuario_por_username(name)
         if usuario is None or not self.verificar_senha(senha, usuario.password):
             return None
         return usuario
@@ -103,4 +118,19 @@ class ServicoUsuario:
     def usuario_atual_dependencia(
         self, token: str = Depends(OAuth2PasswordBearer(tokenUrl="login"))
     ):
+        logger.info("estou aqui")
         return self.obter_usuario_atual(token)
+
+    def adicionar_automacao(self,automacao:Automation):
+        with Session(self.engine) as session:
+            session.add(automacao)
+            session.commit()
+            session.refresh(automacao)
+
+    def verificar_email(self, email: str):
+        with Session(self.engine) as session:
+            email = session.scalar(select(User).where(User.email == email))
+            if email is not None:
+                return True
+
+        return False
