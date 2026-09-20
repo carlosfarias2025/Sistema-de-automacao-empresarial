@@ -5,11 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 import os
-from dotenv import load_dotenv
 from sqlalchemy.exc import IntegrityError
 
-from tablesSQL import Base, User,Automation
-from sqlalchemy import create_engine
+from tablesSQL import User,Automation
 
 from customer_service import ServicoUsuario
 
@@ -22,16 +20,11 @@ logging.basicConfig(
 
 logger = logging.getLogger("uvicorn")
 
-load_dotenv() #Loading .env
-password = os.getenv("POSTGRES_PASSWORD")
-DATABASE_URL = f"postgresql+psycopg://postgres:&{password}@localhost:5432/datasystem"
-engine = create_engine(DATABASE_URL)
-Base.metadata.create_all(engine)
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 app = FastAPI(title="Sistema de automação empresarial")
-customerService = ServicoUsuario(engine=engine, secret_key=SECRET_KEY)
+customerService = ServicoUsuario( secret_key=SECRET_KEY)
 
 
 # ---------------------------------------------------------------------------
@@ -80,14 +73,6 @@ def registrar(newuser:CadastroUsuario):
     )
     return{"access_token":token}
 
-
-@app.get("/users/{user_id}")
-def retornarusers(user_id: int):
-    user = customerService.buscar_usuario_por_id(user_id)
-    if user is None:
-        return {"error":"Usuario não existe"}
-    return {"username":user.username,"fullname":user.fullname,"email":user.email}
-
 @app.post("/login")
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
     usuario = customerService.autenticar_usuario(form_data.username, form_data.password)
@@ -124,6 +109,15 @@ def criar_automacao(automacao: AutomacaoCreate,usuario_atual: User = Depends(cus
         "Automacao": automacao.nome
     }
 
+@app.get("/my_automation")
+def ler_automacao(usuario_atual: User = Depends(customerService.usuario_atual_dependencia)):
+    automacoes = customerService.retornar_automacoes(usuario_atual)
+    return_automacoes:dict[str,str] = {}
+
+    for auto in automacoes:
+        return_automacoes[auto.id] = auto.nome
+
+    return return_automacoes
 
 app.add_middleware(
     CORSMiddleware,

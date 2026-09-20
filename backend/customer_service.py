@@ -4,12 +4,12 @@ import bcrypt
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 
 from tablesSQL import User,Automation
 
 import logging
+
+from Database.connection import database
 
 logger = logging.getLogger(__name__)
 
@@ -18,19 +18,16 @@ class ServicoUsuario:
 
     def __init__(
         self,
-        engine,
         secret_key: str,
         algorithm: str = "HS256",
         access_token_expire_minutes: int = 15,
     ):
-        self.engine = engine
         self.secret_key = secret_key
         self.algorithm = algorithm
         self.access_token_expire_minutes = access_token_expire_minutes
 
     @staticmethod
     def gerar_hash_senha(senha_plana: str) -> str:
-        logger.info("gerando hash senha")
         hash_bytes = bcrypt.hashpw(senha_plana.encode("utf-8"), bcrypt.gensalt())
         return hash_bytes.decode("utf-8")
 
@@ -40,22 +37,18 @@ class ServicoUsuario:
             senha_plana.encode("utf-8"), senha_hash.encode("utf-8")
         )
 
-    def buscar_usuario_por_username(self, username: str):
-        with Session(self.engine) as session:
-            return session.scalar(select(User).where(User.name == username))
-
-    def buscar_usuario_por_id(self, user_id: int):
-        with Session(self.engine) as session:
-            return session.scalar(select(User).where(User.id == user_id))
+    @staticmethod
+    def buscar_usuario_por_username(username: str):
+        try:
+            return database.buscar_str("users","name",username)
+        except ValueError as v:
+            logger.exception(v)
 
     def criar_usuario(
         self, username: str, fullname: str, email: str, senha_plana: str
     ) -> bool:
-        with Session(self.engine) as session:
-            usuario_existente = session.scalar(
-                select(User).where(User.name == username)
-            )
-            email_existente = session.scalar(select(User).where(User.email == email))
+            usuario_existente = database.buscar_str("users","name",username)
+            email_existente = database.buscar_str("users","email",email)
 
             if usuario_existente is not None:
                 return False
@@ -66,7 +59,7 @@ class ServicoUsuario:
                     detail="email já existe"
                 )
 
-            session.add(
+            database.commit(
                 User(
                     name=username,
                     full_name=fullname,
@@ -74,10 +67,6 @@ class ServicoUsuario:
                     password=self.gerar_hash_senha(senha_plana),
                 )
             )
-            try:
-                session.commit()
-            except Exception as e:
-                logger.exception(e)
             return True
 
     def autenticar_usuario(self, name: str, senha: str):
@@ -120,16 +109,18 @@ class ServicoUsuario:
     ):
         return self.obter_usuario_atual(token)
 
-    def adicionar_automacao(self,automacao:Automation):
-        with Session(self.engine) as session:
-            session.add(automacao)
-            session.commit()
-            session.refresh(automacao)
+    @staticmethod
+    def adicionar_automacao(automacao:Automation):
+        database.commit(automacao)
 
-    def verificar_email(self, email: str):
-        with Session(self.engine) as session:
-            email = session.scalar(select(User).where(User.email == email))
-            if email is not None:
-                return True
+    @staticmethod
+    def verificar_email(email: str):
+        email = database.buscar_str("users","email",email)
+        if email is not None:
+            return True
 
         return False
+
+    @staticmethod
+    def retornar_automacoes(user:User):
+        return database.buscar_str("automations","user_id",user.id,all=True)
