@@ -75,6 +75,38 @@ class Database:
                 logger.error(e)
                 return None
 
+    @staticmethod
+    def all(nametable: str, columnname: str, *, all: bool = False) -> User | list | None:
+        class_retorn = None
+        for mapper in Base.registry.mappers:
+            if mapper.local_table.name == nametable:
+                class_retorn = mapper.class_
+                break
+
+        if not class_retorn:
+            raise ValueError(
+                f"Tabela {nametable} não foi encontrada"
+            )
+
+        try:
+            column_obj = getattr(class_retorn, columnname)
+        except AttributeError:
+            raise ValueError(
+                f"A coluna {columnname} não foi encontrado"
+            )
+
+        stm = select(class_retorn)
+
+        with Session(engine) as session:
+            try:
+                if not all:
+                    return session.execute(stm).scalar_one_or_none()
+                else:
+                    return list(session.execute(stm).scalars().all())
+            except Exception as e:
+                logger.error(e)
+                return None
+
 
 
 database = Database()
