@@ -7,11 +7,13 @@ from pydantic import BaseModel
 import os
 from sqlalchemy.exc import IntegrityError
 
+from msg_core import CaixaDeMensagens
 from tablesSQL import User,Automation
 
 from customer_service import ServicoUsuario
 
 import logging
+import uvicorn
 
 logging.basicConfig(
     level=logging.INFO,
@@ -24,12 +26,16 @@ logger = logging.getLogger("uvicorn")
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 app = FastAPI(title="Sistema de automação empresarial")
-customerService = ServicoUsuario( secret_key=SECRET_KEY)
 
-
+customerService: ServicoUsuario = ServicoUsuario(secret_key=SECRET_KEY)
 # ---------------------------------------------------------------------------
 # Rotas
 # ---------------------------------------------------------------------------
+
+def run(msg : CaixaDeMensagens):
+    global customerService
+    customerService = ServicoUsuario(secret_key=SECRET_KEY,msg=msg)
+    uvicorn.run(app, host="0.0.0.0", port=8000,reload=True)
 
 class CadastroUsuario(BaseModel):
     full_name:str
@@ -42,7 +48,6 @@ class AutomacaoCreate(BaseModel):
 
 @app.get("/")
 def seila():
-    logger.info("seila")
     return {"status": "ok"}
 
 @app.post("/registrar")
@@ -118,6 +123,7 @@ def ler_automacao(usuario_atual: User = Depends(customerService.usuario_atual_de
         return_automacoes[auto.id] = auto.nome
 
     return return_automacoes
+
 
 app.add_middleware(
     CORSMiddleware,

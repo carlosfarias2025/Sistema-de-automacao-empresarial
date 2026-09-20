@@ -11,6 +11,8 @@ import logging
 
 from Database.connection import database
 
+from msg_core import Mensagem, CaixaDeMensagens
+
 logger = logging.getLogger(__name__)
 
 class ServicoUsuario:
@@ -21,11 +23,12 @@ class ServicoUsuario:
         secret_key: str,
         algorithm: str = "HS256",
         access_token_expire_minutes: int = 15,
+        msg: CaixaDeMensagens = None,
     ):
         self.secret_key = secret_key
         self.algorithm = algorithm
         self.access_token_expire_minutes = access_token_expire_minutes
-
+        self.msg = msg
     @staticmethod
     def gerar_hash_senha(senha_plana: str) -> str:
         hash_bytes = bcrypt.hashpw(senha_plana.encode("utf-8"), bcrypt.gensalt())
