@@ -30,7 +30,7 @@ class CaixaDeMensagens:
 
         with self._lock:
             minhas = [m for m in self._mensagens if m.para == nome]
-            print(minhas)
+
             self._mensagens = [m for m in self._mensagens if m.para != nome]
-            print(self._mensagens)
+
         return minhas or None
