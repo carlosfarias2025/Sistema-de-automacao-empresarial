@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 import os
 from sqlalchemy.exc import IntegrityError
+from sympy.codegen.ast import none
 
 from msg_core import CaixaDeMensagens
 from tablesSQL import User,Automation
@@ -35,7 +36,7 @@ customerService: ServicoUsuario = ServicoUsuario(secret_key=SECRET_KEY)
 def run(msg : CaixaDeMensagens):
     global customerService
     customerService = ServicoUsuario(secret_key=SECRET_KEY,msg=msg)
-    uvicorn.run(app, host="0.0.0.0", port=8000,reload=True)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 class CadastroUsuario(BaseModel):
     full_name:str
@@ -133,3 +134,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+if __name__ == "__main__":
+    run(CaixaDeMensagens())

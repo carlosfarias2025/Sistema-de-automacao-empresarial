@@ -11,8 +11,5 @@ core.start()
 api = threading.Thread(target=run,args=([msg]), daemon=True)
 api.start()
 
-core.join()
 
-mesagem = msg.receber("sei")
-print(mesagem[0].para)
-#api.join()
+api.join()
