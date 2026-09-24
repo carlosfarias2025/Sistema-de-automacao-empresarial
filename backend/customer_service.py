@@ -29,6 +29,7 @@ class ServicoUsuario:
         self.algorithm = algorithm
         self.access_token_expire_minutes = access_token_expire_minutes
         self.msg = msg
+        self.name = "service_user"
     @staticmethod
     def gerar_hash_senha(senha_plana: str) -> str:
         hash_bytes = bcrypt.hashpw(senha_plana.encode("utf-8"), bcrypt.gensalt())
@@ -112,8 +113,16 @@ class ServicoUsuario:
     ):
         return self.obter_usuario_atual(token)
 
-    @staticmethod
-    def adicionar_automacao(automacao:Automation):
+    def adicionar_automacao(self,automacao:Automation):
+        if self.msg is not None:
+            self.msg.enviar(Mensagem(
+                de=self.name,
+                para="core",
+                tipo="atualizacao",
+                dados={
+                    "name":automacao.nome,
+                }
+            ))
         database.commit(automacao)
 
     @staticmethod
