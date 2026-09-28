@@ -8,10 +8,15 @@ function App() {
   const [modo, setModo] = useState('login')
   const [apiOnline, setApiOnline] = useState(null)
   const [perfil, setPerfil] = useState(null)
+  const [automacoes, setAutomacoes] = useState(null)
   const [carregando, setCarregando] = useState(false)
+  const [salvandoAutomacao, setSalvandoAutomacao] = useState(false)
   const [mensagem, setMensagem] = useState(null)
 
-  async function carregarPerfil(token) { setPerfil(await api.obterPerfil(token)) }
+  async function carregarPerfil(token) {
+    setPerfil(await api.obterPerfil(token))
+    setAutomacoes(await api.obterAutomacoes(token))
+  }
 
   useEffect(() => {
     async function iniciar() {
@@ -45,12 +50,38 @@ function App() {
     } catch (erro) { setMensagem({ tipo: 'erro', texto: erro.message }) } finally { setCarregando(false) }
   }
 
-  function sair() { localStorage.removeItem(TOKEN_KEY); setPerfil(null); setMensagem(null); setModo('login') }
+  async function enviarAutomacao(event) {
+    event.preventDefault()
+    const formulario = event.currentTarget
+    const dados = new FormData(formulario)
+    const token = localStorage.getItem(TOKEN_KEY)
+    setSalvandoAutomacao(true); setMensagem(null)
+    try {
+      await api.criarAutomacao(dados.get('nome'), token)
+      setAutomacoes(await api.obterAutomacoes(token))
+      formulario.reset()
+      setMensagem({ tipo: 'sucesso', texto: 'Automação adicionada.' })
+    } catch (erro) { setMensagem({ tipo: 'erro', texto: erro.message }) } finally { setSalvandoAutomacao(false) }
+  }
+
+  function sair() { localStorage.removeItem(TOKEN_KEY); setPerfil(null); setAutomacoes(null); setMensagem(null); setModo('login') }
 
   if (perfil) return <main className="pagina"><section className="painel painel-perfil">
     <span className="marca">Sistema de automação</span><div className="avatar" aria-hidden="true">{perfil.username.slice(0, 1).toUpperCase()}</div>
     <p className="sobretitulo">Sessão ativa</p><h1>Olá, {perfil.full_name || perfil.username}.</h1><p className="descricao">Você está conectado e sua área protegida está disponível.</p>
     <dl className="dados-perfil"><div><dt>Usuário</dt><dd>{perfil.username}</dd></div><div><dt>Permissão</dt><dd>{perfil.role}</dd></div></dl>
+    <section className="secao-automacoes" aria-labelledby="titulo-automacoes">
+      <h2 id="titulo-automacoes">Suas automações</h2>
+      {mensagem && <p className={`mensagem ${mensagem.tipo}`} role="status">{mensagem.texto}</p>}
+      <form onSubmit={enviarAutomacao} className="formulario formulario-automacao">
+        <label>Nome da automação<input name="nome" maxLength="100" required /></label>
+        <button className="botao" disabled={salvandoAutomacao}>{salvandoAutomacao ? 'Adicionando...' : 'Adicionar automação'}</button>
+      </form>
+      <h3>Automações cadastradas</h3>
+      {automacoes === null ? <p className="estado-automacoes">Carregando automações...</p> : Object.keys(automacoes).length === 0 ? <p className="estado-automacoes">Você ainda não tem automações.</p> : <ul className="lista-automacoes">
+        {Object.entries(automacoes).map(([id, nome]) => <li key={id}><span className="id-automacao">ID {id}</span><span className="nome-automacao">{nome}</span></li>)}
+      </ul>}
+    </section>
     <button className="botao botao-secundario" onClick={sair}>Sair da conta</button>
   </section></main>
 

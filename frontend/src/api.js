@@ -13,4 +13,6 @@ export const api = {
   cadastrar: ({ full_name, name, email, password }) => requisicao('/registrar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ full_name, name, email, password }) }),
   entrar: ({ username, password }) => requisicao('/login', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ username, password }) }),
   obterPerfil: (token) => requisicao('/perfil', { headers: { Authorization: `Bearer ${token}` } }),
+  obterAutomacoes: (token) => requisicao('/my_automation', { headers: { Authorization: `Bearer ${token}` } }),
+  criarAutomacao: (nome, token) => requisicao('/automacao', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ nome }) }),
 }
