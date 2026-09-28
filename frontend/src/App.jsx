@@ -11,6 +11,7 @@ function App() {
   const [automacoes, setAutomacoes] = useState(null)
   const [carregando, setCarregando] = useState(false)
   const [salvandoAutomacao, setSalvandoAutomacao] = useState(false)
+  const [removendoAutomacao, setRemovendoAutomacao] = useState(null)
   const [mensagem, setMensagem] = useState(null)
 
   async function carregarPerfil(token) {
@@ -64,6 +65,20 @@ function App() {
     } catch (erro) { setMensagem({ tipo: 'erro', texto: erro.message }) } finally { setSalvandoAutomacao(false) }
   }
 
+  async function removerAutomacao(id) {
+    const token = localStorage.getItem(TOKEN_KEY)
+    setRemovendoAutomacao(id); setMensagem(null)
+    try {
+      await api.removerAutomacao(id, token)
+      setAutomacoes((atuais) => {
+        const atualizadas = { ...atuais }
+        delete atualizadas[id]
+        return atualizadas
+      })
+      setMensagem({ tipo: 'sucesso', texto: 'Automação removida.' })
+    } catch (erro) { setMensagem({ tipo: 'erro', texto: erro.message }) } finally { setRemovendoAutomacao(null) }
+  }
+
   function sair() { localStorage.removeItem(TOKEN_KEY); setPerfil(null); setAutomacoes(null); setMensagem(null); setModo('login') }
 
   if (perfil) return <main className="pagina"><section className="painel painel-perfil">
@@ -79,7 +94,7 @@ function App() {
       </form>
       <h3>Automações cadastradas</h3>
       {automacoes === null ? <p className="estado-automacoes">Carregando automações...</p> : Object.keys(automacoes).length === 0 ? <p className="estado-automacoes">Você ainda não tem automações.</p> : <ul className="lista-automacoes">
-        {Object.entries(automacoes).map(([id, nome]) => <li key={id}><span className="id-automacao">ID {id}</span><span className="nome-automacao">{nome}</span></li>)}
+        {Object.entries(automacoes).map(([id, nome]) => <li key={id}><span className="id-automacao">ID {id}</span><span className="nome-automacao">{nome}</span><button className="botao-remover" type="button" aria-label={`Remover automação ${nome}`} title="Remover automação" disabled={removendoAutomacao !== null} onClick={() => removerAutomacao(id)}>{removendoAutomacao === id ? 'Removendo...' : 'Remover'}</button></li>)}
       </ul>}
     </section>
     <button className="botao botao-secundario" onClick={sair}>Sair da conta</button>

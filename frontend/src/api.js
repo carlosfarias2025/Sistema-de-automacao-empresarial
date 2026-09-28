@@ -15,4 +15,5 @@ export const api = {
   obterPerfil: (token) => requisicao('/perfil', { headers: { Authorization: `Bearer ${token}` } }),
   obterAutomacoes: (token) => requisicao('/my_automation', { headers: { Authorization: `Bearer ${token}` } }),
   criarAutomacao: (nome, token) => requisicao('/automacao', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: JSON.stringify({ nome }) }),
+  removerAutomacao: (id, token) => requisicao(`/my_automation_delete/${id}`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }),
 }
