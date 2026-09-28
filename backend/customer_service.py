@@ -30,6 +30,27 @@ class ServicoUsuario:
         self.access_token_expire_minutes = access_token_expire_minutes
         self.msg = msg
         self.name = "service_user"
+
+
+    @staticmethod
+    def remover_automacao(id_automations:int, user:User):
+            automacao = database.verificaautomacaouser(id_automations, user.id)
+            if automacao:
+                instancia = database.buscar_str("automations","id",id_automations)
+                if database.remove(instancia):
+                    return True
+                else:
+                    raise HTTPException(
+                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        detail="Erro ao remover automação"
+                    )
+    
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Automação não pertence ao usuário ou não existe"
+                )
+            
     @staticmethod
     def gerar_hash_senha(senha_plana: str) -> str:
         hash_bytes = bcrypt.hashpw(senha_plana.encode("utf-8"), bcrypt.gensalt())
@@ -136,3 +157,6 @@ class ServicoUsuario:
     @staticmethod
     def retornar_automacoes(user:User):
         return database.buscar_str("automations","user_id",user.id,all=True)
+    
+    
+
