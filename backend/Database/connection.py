@@ -38,7 +38,7 @@ class Database:
 
         with Session(engine) as session:
             try:
-                result = session.execute(stm)
+                result = session.execute(stm).first()
                 return result
             except Exception as e:
                 logger.error(e)
@@ -106,6 +106,36 @@ class Database:
             except Exception as e:
                 logger.error(e)
                 return None
+
+
+    @staticmethod
+    def remove(obj) -> bool:
+            try:
+                with Session(engine) as session:
+                    session.delete(obj)
+                    session.commit()
+                return True
+            except Exception as e:
+                logger.error(e)
+                return False
+
+    @staticmethod
+    def verificaautomacaouser(id:int,user_id) -> bool:
+            tableautomation = Base.metadata.tables["automations"]
+
+            stm = select(tableautomation).where(tableautomation.c.id == id and  tableautomation.c.user_id == user_id)
+
+
+            with Session(engine) as session:
+                try:
+                    result = session.execute(stm).first()
+                    if result is None:
+                        return False
+                    else:
+                        return True
+                except Exception as e:
+                    logger.exception(e)
+                    raise
 
 
 
