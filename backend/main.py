@@ -1,4 +1,5 @@
 from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -113,7 +114,7 @@ def criar_automacao(automacao: AutomacaoCreate,usuario_atual: User = Depends(cus
     customerService.adicionar_automacao(automation)
     return {
         "Automacao": automacao.nome
-    }
+    }   
 
 @app.get("/my_automation")
 def ler_automacao(usuario_atual: User = Depends(customerService.usuario_atual_dependencia)):
@@ -121,10 +122,15 @@ def ler_automacao(usuario_atual: User = Depends(customerService.usuario_atual_de
     return_automacoes:dict[str,str] = {}
 
     for auto in automacoes:
-        return_automacoes[auto.id] = auto.nome
+        return_automacoes[str(auto.id)] = auto.nome
 
-    return return_automacoes
+    return JSONResponse(content=return_automacoes)
 
+@app.post("/my_automation_delete/{id}")
+def remover(id:int,usuario_atual: User = Depends(customerService.usuario_atual_dependencia)):
+    deletarautomation = customerService.remover_automacao(id,usuario_atual)
+    if deletarautomation:
+        return JSONResponse(content={"status":"ok"})
 
 app.add_middleware(
     CORSMiddleware,
