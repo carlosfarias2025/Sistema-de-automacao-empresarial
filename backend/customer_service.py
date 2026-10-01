@@ -155,7 +155,7 @@ class ServicoUsuario:
         return False
 
     @staticmethod
-    def retornar_automacoes(user:User):
+    def retornar_automacoes(user:User) ->list:
         return database.buscar_str("automations","user_id",user.id,all=True)
     
     
