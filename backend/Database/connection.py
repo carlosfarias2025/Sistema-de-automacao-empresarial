@@ -120,10 +120,11 @@ class Database:
                 return False
 
     @staticmethod
-    def verificaautomacaouser(id:int,user_id) -> bool:
+    def verificaautomacaouser(id:int,user_id:int) -> bool:
             tableautomation = Base.metadata.tables["automations"]
-
-            stm = select(tableautomation).where(tableautomation.c.id == id and  tableautomation.c.user_id == user_id)
+            stm = select(tableautomation).where(
+                tableautomation.c.id == id,
+                tableautomation.c.user_id == user_id)
 
 
             with Session(engine) as session:
