@@ -7,7 +7,6 @@ from pydantic import BaseModel
 
 import os
 from sqlalchemy.exc import IntegrityError
-from sympy.codegen.ast import none
 
 from msg_core import CaixaDeMensagens
 from tablesSQL import User,Automation
@@ -131,6 +130,8 @@ def remover(id:int,usuario_atual: User = Depends(customerService.usuario_atual_d
     deletarautomation = customerService.remover_automacao(id,usuario_atual)
     if deletarautomation:
         return JSONResponse(content={"status":"ok"})
+    else:
+        raise
 
 app.add_middleware(
     CORSMiddleware,
