@@ -1,5 +1,5 @@
 import threading
-from main import run
+from api import run
 from core import Core
 from msg_core import CaixaDeMensagens
 
