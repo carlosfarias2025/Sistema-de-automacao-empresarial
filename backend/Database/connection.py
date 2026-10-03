@@ -7,7 +7,7 @@ import os
 from dotenv import load_dotenv
 import logging
 
-from tablesSQL import User,Automation,Base
+from TablesSQL import User,Automation,Base
 
 load_dotenv() #Loading .env
 password = os.getenv("POSTGRES_PASSWORD")

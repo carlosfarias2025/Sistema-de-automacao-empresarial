@@ -9,7 +9,7 @@ import os
 from sqlalchemy.exc import IntegrityError
 
 from msg_core import CaixaDeMensagens
-from tablesSQL import User,Automation
+from TablesSQL import User,Automation
 
 from customer_service import ServicoUsuario
 

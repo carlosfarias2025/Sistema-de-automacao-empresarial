@@ -5,7 +5,7 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
-from tablesSQL import User,Automation
+from TablesSQL import User,Automation
 
 import logging
 
