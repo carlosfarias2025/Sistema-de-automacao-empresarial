@@ -32,12 +32,20 @@ class ServicoUsuario:
         self.name = "service_user"
 
 
-    @staticmethod
-    def remover_automacao(id_automations:int, user:User):
+
+    def remover_automacao(self,id_automations:int, user:User):
             automacao = database.verificaautomacaouser(id_automations, user.id)
             if automacao:
                 instancia = database.buscar_str("automations","id",id_automations)
                 if database.remove(instancia):
+                    self.msg.enviar(Mensagem(
+                        de=self.name,
+                        para="core",
+                        tipo="apagar automacao",
+                        dados={
+                            "name":instancia.nome
+                        }
+                    ))
                     return True
                 else:
                     raise HTTPException(
