@@ -36,28 +36,39 @@ class Core(threading.Thread):
         log.info("Core iniciado")
 
     def run(self):
+        tempo_ = time.time()
+        intervalo = 30.0
+
         while True:
+            tempo = time.time()
+
+            global enviar
             receber = self.msg.receber(self.name)
 
             if receber:
                 log.info("Recebi mensagens")
                 for dados in receber:
-                    self.valores.append(dados.dados["name"])
+                    if dados.tipo == "apagar automacao":
+                        self.valores.remove(dados.dados["name"])
+                        log.info(f"Removendo item {dados.dados["name"]}")
+                    elif dados.tipo == "atualizacao":
+                        self.valores.append(dados.dados["name"])
+                        log.info(f"Adicionado item {dados.dados["name"]}")
 
-            time.sleep(10)
-            enviarmsg = ""
-            for i in self.valores:
-                enviarmsg += i
-                enviarmsg += " "
+            if tempo - tempo_ >= intervalo:
+                tempo_ = tempo
+                enviarmsg = ""
+                for i in self.valores:
+                    enviarmsg += i
+                    enviarmsg += " "
 
+                log.info("enviando email")
 
-            log.info("enviando email")
-            global enviar
-            yag.send(
-                to=enviar,
-                subject="Mensagem do core",
-                contents=enviarmsg
-            )
+                yag.send(
+                    to=enviar,
+                    subject="Mensagem do core",
+                    contents=enviarmsg
+                )
 
 
 
